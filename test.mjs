@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import { WORLD, LEVELS, newRun, step, nextLevel, circlesOverlap, pointInExpandedRect } from './game.js';
+assert.equal(LEVELS.length, 4, 'four escalating levels');
+assert.ok(LEVELS[3].obstacles.length > LEVELS[0].obstacles.length, 'later levels add obstacles');
+assert.ok(LEVELS[3].enemies.length > LEVELS[0].enemies.length, 'later levels add opponents');
+assert.equal(circlesOverlap({x:0,y:0},10,{x:19,y:0},10),true,'circle collision at overlap');
+assert.equal(circlesOverlap({x:0,y:0},10,{x:20,y:0},10),false,'fair tangent contact is safe');
+assert.equal(pointInExpandedRect({x:95,y:50},{x:100,y:40,w:30,h:20},6),true,'wall collision includes marble radius');
+let run=newRun();run={...run,marble:{x:5,y:100,vx:-2,vy:0}};let hit=step(run,{x:0,y:0},1/60);assert.equal(hit.lives,2,'wall collision costs one life');assert.deepEqual({x:hit.marble.x,y:hit.marble.y},LEVELS[0].start,'collision respawns at start');
+run=newRun();run={...run,marble:{x:LEVELS[0].goal.x,y:LEVELS[0].goal.y,vx:0,vy:0}};assert.equal(step(run,{x:0,y:0},0).status,'cleared','goal clears non-final level');
+assert.equal(nextLevel(newRun()).levelIndex,1,'clear advances one level');
+run=newRun(3);run={...run,marble:{x:LEVELS[3].goal.x,y:LEVELS[3].goal.y,vx:0,vy:0}};assert.equal(step(run,{x:0,y:0},0).status,'won','final goal wins run');
+run=newRun();run={...run,remaining:.01};assert.equal(step(run,{x:0,y:0},.02).status,'lost','timer loss is enforced');
+run=newRun();const moved=step(run,{x:1,y:0},1/60);assert.ok(moved.marble.x>run.marble.x,'normalized fallback input accelerates marble');
+console.log('physics, fair collisions, progression, timer, and desktop fallback: ok');
