@@ -4,13 +4,14 @@ A portrait-first tilt maze for Rabbit R1. Roll a vivid marble through four longe
 
 ## launch flow and fixed display
 
-The page is a single, non-scrolling **240×282** game shell. The game begins on a Marble Madness splash screen. Tap to continue, then choose **start game** from the main menu. Once running, the board fills the usable display; its compact HUD and controls are overlays, not a header or separate frame.
+The page is a single, non-scrolling **240×282** game shell. The game begins on a Marble Madness splash screen. Tap anywhere on the splash (including **tap to continue**), then choose **start game** from the main menu. Once running, the board fills the usable display; its compact HUD and controls are overlays, not a header or separate frame.
 
 - **waffle menu:** tap `☰` during play to open a full overlay above the board. It pauses simulation, timer, synthesized audio, and input. Choose **continue**, the close control, or press Escape to dismiss it and resume.
 - **tilt:** the visible `tilt` button at the lower-left is available while playing. Tap it to enable the browser-standard motion-control path. Its state is repeated in the waffle menu.
 - **desktop fallback:** arrow keys or WASD steer; tap/hold a board edge to simulate tilt. Space triggers bounce; Shift+Space triggers super bounce.
-- **bounce:** clears one board-unit-high obstacle and travels one board unit in the last steering direction.
-- **super bounce:** collect orange star orbs, then use **super bounce** to clear and travel up to three board units. It consumes one charge.
+- **circular D-pad:** visible during touch play. Each outer sector rolls the marble in the arrow direction; the center action is always visible.
+- **bounce:** the D-pad center button clears one board-unit-high obstacle and travels one board unit in the last steering direction.
+- **super bounce:** collect orange star orbs and that same center button becomes **super**, clearing and traveling up to three board units. It consumes one charge.
 - **audio:** starts from a user gesture and uses lightweight Web Audio synthesized pulses, jumps, pickups, collisions, and clears. It fails gracefully and can be muted.
 
 ## sensor path and limitation

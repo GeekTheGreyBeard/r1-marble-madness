@@ -10,3 +10,18 @@ run=newRun();run={...run,marble:{x:LEVELS[0].goal.x,y:LEVELS[0].goal.y,vx:0,vy:0
 
 const html=fs.readFileSync('./index.html','utf8'), css=fs.readFileSync('./styles.css','utf8'), app=fs.readFileSync('./app.js','utf8');
 assert.match(html,/id=\"splash\"/,'opening splash exists');assert.match(html,/id=\"start-menu\"/,'start menu exists');assert.match(html,/id=\"menu\" class=\"menu-overlay\"/,'waffle overlay exists');assert.match(html,/id=\"waffle\"/,'waffle remains available during play');assert.match(css,/#r1-shell,\.canvas-wrap\{width:240px;height:282px\}/,'physical viewport remains fixed');assert.ok(!css.includes('orange bar'),'large orange header is absent');assert.match(app,/phase==='playing'&&!menuOpen&&!manualPause/,'menu state pauses the simulation');assert.match(app,/freezeAudio\(\)/,'menu state pauses audio');assert.match(html,/id=\"continue\"/,'splash uses a tap-to-continue affordance');console.log('splash/menu pause, fixed full-screen board, and centered camera: ok');
+
+assert.match(html,/id="dpad"/,'gameplay includes a visible circular touch D-pad');
+assert.match(html,/id="bounce" class="pad-action"/,'D-pad center action is present');
+assert.match(app,/const continueToMenu=\(\)=>showPhase\('menu'\)/,'splash tap advances to start menu');
+assert.match(app,/function startGame\(\).*showPhase\('playing'\)/,'start button advances into active gameplay');
+assert.match(app,/dpad\.hidden=next!==\'playing\'/,'D-pad is shown during gameplay only');
+assert.match(app,/setPadDirection\(direction,true\)/,'D-pad pointer input reaches movement controls');
+assert.match(app,/jump\(run\.superJumps>0\)/,'center action uses super bounce whenever a charge is held');
+assert.match(css,/\.dpad\{[^}]*border-radius:50%/,'touch controls are circular');
+const origin=newRun().marble;
+assert.ok(step(newRun(),{x:0,y:-1},1/60).marble.y<origin.y,'up D-pad mapping rolls up');
+assert.ok(step(newRun(),{x:0,y:1},1/60).marble.y>origin.y,'down D-pad mapping rolls down');
+assert.ok(step(newRun(),{x:-1,y:0},1/60).marble.x<origin.x,'left D-pad mapping rolls left');
+assert.ok(step(newRun(),{x:1,y:0},1/60).marble.x>origin.x,'right D-pad mapping rolls right');
+console.log('startup transitions, touch D-pad directions, and normal/super center action: ok');

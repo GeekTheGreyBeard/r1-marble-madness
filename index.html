@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Marble Madness · R1 Creation</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20260926-2">
 </head>
 <body>
   <main id="r1-shell" aria-label="Marble Madness R1 game">
@@ -13,6 +13,13 @@
       <section id="hud" class="hud" aria-label="game status" hidden><span id="level">01</span><span id="lives">● ● ●</span><span id="timer">75.0</span></section>
       <button id="tilt" class="tilt-control" aria-label="enable tilt controls" hidden>tilt</button>
       <button id="waffle" class="waffle" aria-label="open controls and options" aria-expanded="false" hidden>☰</button>
+      <section id="dpad" class="dpad" aria-label="touch movement and bounce controls" hidden>
+        <button class="pad-dir pad-up" data-direction="up" aria-label="move up">▲</button>
+        <button class="pad-dir pad-left" data-direction="left" aria-label="move left">◀</button>
+        <button id="bounce" class="pad-action" aria-label="bounce">bounce</button>
+        <button class="pad-dir pad-right" data-direction="right" aria-label="move right">▶</button>
+        <button class="pad-dir pad-down" data-direction="down" aria-label="move down">▼</button>
+      </section>
       <div id="notice" role="status"></div>
       <section id="splash" class="screen splash-screen" aria-label="Marble Madness opening screen">
         <div class="logo-orb" aria-hidden="true"></div><h1>marble<br>madness</h1><p>tap to continue</p>
@@ -23,10 +30,10 @@
         <button id="start" class="primary">start game</button><button id="start-waffle" class="secondary">☰ options</button>
       </section>
       <section id="menu" class="menu-overlay" aria-label="game controls and options" hidden>
-        <div class="menu-panel"><div class="menu-heading"><span>paused</span><button id="close-menu" aria-label="resume game">×</button></div><p><span id="tilt-status">tilt ready — tap tilt to enable</span><br>arrows/WASD or hold a board edge steer.<br>space bounces · shift+space super bounces.</p><div class="menu-grid"><button id="jump">bounce</button><button id="super">super bounce</button><button id="audio">audio on</button><button id="pause">pause</button><button id="restart">restart</button><button id="theme">light mode</button></div><button id="resume" class="primary">continue</button></div>
+        <div class="menu-panel"><div class="menu-heading"><span>paused</span><button id="close-menu" aria-label="resume game">×</button></div><p><span id="tilt-status">tilt ready — tap tilt to enable</span><br>the circular pad moves in its displayed direction. Its center button bounces; a collected star makes it super bounce.</p><div class="menu-grid"><button id="audio">audio on</button><button id="pause">pause</button><button id="restart">restart</button><button id="theme">light mode</button></div><button id="resume" class="primary">continue</button></div>
       </section>
     </div>
   </main>
-  <script type="module" src="app.js"></script>
+  <script type="module" src="app.js?v=20260926-2"></script>
 </body>
 </html>
