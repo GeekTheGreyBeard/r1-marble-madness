@@ -1,20 +1,23 @@
 (() => {
-  // game.js?v=20260926-2
+  // game.js?v=20260926-5
   var VIEWPORT = { width: 320, height: 376, physicalWidth: 240, physicalHeight: 282 };
   var WORLD = { width: 320, height: 1400, marbleRadius: 12, goalRadius: 19, unit: 22 };
+  var BOUNCE = { holdMs: 400, quickUnits: 1, longUnits: 3, airborneSeconds: 0.38, cooldownSeconds: 0.48 };
+  var DIFFICULTIES = ["beginner", "standard", "pro"];
   var CAMERA_LEAD = { forward: 38, backward: -24, neutral: 0 };
   var wall = (x, y, w, h = WORLD.unit, type = "wall") => ({ x, y, w, h, type });
   var feature = (x, y, r, type) => ({ x, y, r, type });
   var level = (name, start, goal, obstacles, enemies, powerups, time, features = []) => ({ name, start, goal, obstacles, enemies, powerups, time, features });
   var LEVELS = [
-    level("first roll", { x: 54, y: 1334 }, { x: 267, y: 66 }, [wall(30, 1210, 185), wall(125, 1018, 165), wall(30, 835, 208), wall(96, 640, 194), wall(30, 450, 205), wall(150, 255, 140), wall(220, 950, 58, 11, "half"), wall(22, 680, 54, 22, "rebound")], [], [{ x: 266, y: 1075 }], 75, [feature(262, 790, 18, "pit"), feature(55, 550, 18, "ice")]),
-    level("switchback", { x: 52, y: 1335 }, { x: 270, y: 62 }, [wall(30, 1245, 210), wall(82, 1085, 206), wall(30, 925, 200), wall(105, 760, 184), wall(30, 590, 205), wall(110, 410, 178), wall(30, 225, 188), wall(202, 925, WORLD.unit, 88), wall(28, 700, 65, 11, "half"), wall(245, 480, 50, 22, "rebound")], [{ x: 264, y: 1150, r: 14, axis: "y", span: 74, speed: 0.9 }], [{ x: 54, y: 700 }], 82, [feature(260, 1030, 19, "pit"), feature(55, 515, 18, "sticky"), feature(255, 320, 15, "bumper")]),
-    level("crossfire", { x: 52, y: 1335 }, { x: 269, y: 60 }, [wall(30, 1260, 215), wall(90, 1100, 198), wall(30, 940, 202), wall(95, 780, 193), wall(30, 620, 201), wall(104, 455, 185), wall(30, 290, 195), wall(145, 941, WORLD.unit, 76), wall(62, 620, WORLD.unit, 66), wall(225, 700, 64, 11, "half"), wall(22, 375, 56, 22, "rebound")], [{ x: 258, y: 1180, r: 14, axis: "y", span: 68, speed: 1.2 }, { x: 65, y: 520, r: 14, axis: "x", span: 55, speed: 1.05 }], [{ x: 262, y: 860 }, { x: 56, y: 350 }], 88, [feature(262, 1050, 20, "pit"), feature(58, 845, 18, "ice"), feature(250, 545, 16, "bumper"), feature(60, 205, 15, "spikes")]),
-    level("marble storm", { x: 52, y: 1335 }, { x: 270, y: 60 }, [wall(30, 1270, 174), wall(113, 1120, 175), wall(30, 975, 189), wall(98, 830, 190), wall(30, 680, 198), wall(121, 530, 167), wall(30, 370, 198), wall(116, 210, 172), wall(52, 980, WORLD.unit, 76), wall(252, 720, WORLD.unit, 70), wall(145, 531, WORLD.unit, 76), wall(228, 890, 62, 11, "half"), wall(20, 455, 60, 22, "rebound")], [{ x: 245, y: 1210, r: 14, axis: "x", span: 78, speed: 1.55 }, { x: 55, y: 740, r: 14, axis: "y", span: 75, speed: 1.35 }, { x: 245, y: 350, r: 14, axis: "x", span: 65, speed: 1.7 }], [{ x: 55, y: 1040 }, { x: 262, y: 575 }], 96, [feature(260, 1080, 20, "pit"), feature(56, 875, 18, "sticky"), feature(250, 600, 16, "bumper"), feature(55, 285, 16, "spikes"), feature(257, 440, 18, "ice")])
+    level("first roll", { x: 54, y: 1334 }, { x: 267, y: 66 }, [wall(30, 1210, 185), wall(125, 1018, 165), wall(30, 835, 208), wall(96, 640, 194), wall(30, 450, 205), wall(150, 255, 140), wall(220, 950, 58, 11, "half"), wall(22, 680, 54, 22, "rebound")], [], [{ x: 266, y: 1075 }], 75, [feature(262, 790, 18, "pit"), feature(55, 550, 18, "ice"), feature(260, 680, 22, "sand"), feature(55, 360, 21, "merry")]),
+    level("switchback", { x: 52, y: 1335 }, { x: 270, y: 62 }, [wall(30, 1245, 210), wall(82, 1085, 206), wall(30, 925, 200), wall(105, 760, 184), wall(30, 590, 205), wall(110, 410, 178), wall(30, 225, 188), wall(202, 925, WORLD.unit, 88), wall(28, 700, 65, 11, "half"), wall(245, 480, 50, 22, "rebound")], [{ x: 264, y: 1150, r: 14, axis: "y", span: 74, speed: 0.9 }], [{ x: 54, y: 700 }], 82, [feature(260, 1030, 19, "pit"), feature(55, 515, 18, "sticky"), feature(255, 320, 15, "bumper"), feature(55, 825, 22, "sand"), feature(258, 250, 21, "merry")]),
+    level("crossfire", { x: 52, y: 1335 }, { x: 269, y: 60 }, [wall(30, 1260, 215), wall(90, 1100, 198), wall(30, 940, 202), wall(95, 780, 193), wall(30, 620, 201), wall(104, 455, 185), wall(30, 290, 195), wall(145, 941, WORLD.unit, 76), wall(62, 620, WORLD.unit, 66), wall(225, 700, 64, 11, "half"), wall(22, 375, 56, 22, "rebound")], [{ x: 258, y: 1180, r: 14, axis: "y", span: 68, speed: 1.2 }, { x: 65, y: 520, r: 14, axis: "x", span: 55, speed: 1.05 }], [{ x: 262, y: 860 }, { x: 56, y: 350 }], 88, [feature(262, 1050, 20, "pit"), feature(58, 845, 18, "ice"), feature(250, 545, 16, "bumper"), feature(60, 205, 15, "spikes"), feature(256, 870, 22, "sand"), feature(57, 440, 21, "merry")]),
+    level("marble storm", { x: 52, y: 1335 }, { x: 270, y: 60 }, [wall(30, 1270, 174), wall(113, 1120, 175), wall(30, 975, 189), wall(98, 830, 190), wall(30, 680, 198), wall(121, 530, 167), wall(30, 370, 198), wall(116, 210, 172), wall(52, 980, WORLD.unit, 76), wall(252, 720, WORLD.unit, 70), wall(145, 531, WORLD.unit, 76), wall(228, 890, 62, 11, "half"), wall(20, 455, 60, 22, "rebound")], [{ x: 245, y: 1210, r: 14, axis: "x", span: 78, speed: 1.55 }, { x: 55, y: 740, r: 14, axis: "y", span: 75, speed: 1.35 }, { x: 245, y: 350, r: 14, axis: "x", span: 65, speed: 1.7 }], [{ x: 55, y: 1040 }, { x: 262, y: 575 }], 96, [feature(260, 1080, 20, "pit"), feature(56, 875, 18, "sticky"), feature(250, 600, 16, "bumper"), feature(55, 285, 16, "spikes"), feature(257, 440, 18, "ice"), feature(256, 965, 22, "sand"), feature(55, 620, 21, "merry")])
   ];
-  function newRun(levelIndex = 0) {
+  function newRun(levelIndex = 0, difficulty = "standard") {
+    if (!DIFFICULTIES.includes(difficulty)) throw Error("unknown difficulty");
     const l = LEVELS[levelIndex];
-    return { levelIndex, marble: { ...l.start, vx: 0, vy: 0 }, enemies: l.enemies.map((e) => ({ ...e, origin: e[e.axis], direction: 1 })), powerups: l.powerups.map((p) => ({ ...p, collected: false })), remaining: l.time, lives: 3, status: "playing", airborne: 0, jumpCooldown: 0, jumpKind: null, superJumps: 0, lastDirection: { x: 0, y: -1 }, failure: null };
+    return { levelIndex, difficulty, marble: { ...l.start, vx: 0, vy: 0 }, enemies: l.enemies.map((e) => ({ ...e, origin: e[e.axis], direction: 1 })), powerups: l.powerups.map((p) => ({ ...p, collected: false })), remaining: l.time, lives: 3, status: "playing", airborne: 0, jumpCooldown: 0, jumpKind: null, superJumps: 0, lastDirection: { x: 0, y: -1 }, failure: null, dizzy: 0, terrain: null, gravity: false };
   }
   function circlesOverlap(a, ar, b, br) {
     return Math.hypot(a.x - b.x, a.y - b.y) < ar + br;
@@ -37,8 +40,7 @@
     return ["explode", "crumble", "melt"][(run2.levelIndex + run2.lives) % 3];
   }
   function collisionAllowed(obstacle, run2) {
-    const clearance = run2.jumpKind === "super" ? WORLD.unit * 3 : WORLD.unit;
-    return run2.airborne > 0 && obstacle.h <= clearance;
+    return run2.airborne > 0 && obstacle.h <= WORLD.unit;
   }
   function reflected(m, old, obstacle) {
     const n = { ...m };
@@ -51,31 +53,67 @@
     }
     return n;
   }
-  function requestJump(run2, useSuper = false) {
+  var clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+  function requestJump(run2, heldMs = 0) {
     if (run2.status !== "playing" || run2.airborne > 0 || run2.jumpCooldown > 0) return run2;
-    const canSuper = useSuper && run2.superJumps > 0;
-    const kind = canSuper ? "super" : "normal", distance = canSuper ? WORLD.unit * 3 : WORLD.unit;
-    const d = run2.lastDirection;
-    const marble = { ...run2.marble, x: Math.max(WORLD.marbleRadius, Math.min(WORLD.width - WORLD.marbleRadius, run2.marble.x + d.x * distance)), y: Math.max(WORLD.marbleRadius, Math.min(WORLD.height - WORLD.marbleRadius, run2.marble.y + d.y * distance)) };
-    return { ...run2, marble, airborne: canSuper ? 0.62 : 0.38, jumpCooldown: 0.48, jumpKind: kind, superJumps: run2.superJumps - (canSuper ? 1 : 0) };
+    const charged = run2.superJumps > 0, units = (heldMs >= BOUNCE.holdMs ? BOUNCE.longUnits : BOUNCE.quickUnits) * (charged ? 2 : 1);
+    const d = run2.lastDirection, origin = run2.marble, end = { x: origin.x + d.x * units * WORLD.unit, y: origin.y + d.y * units * WORLD.unit };
+    const l = LEVELS[run2.levelIndex];
+    let destination = { ...origin };
+    const samples = Math.ceil(units * WORLD.unit / 3);
+    for (let i = 1; i <= samples; i++) {
+      const p = { x: origin.x + (end.x - origin.x) * i / samples, y: origin.y + (end.y - origin.y) * i / samples };
+      if (p.x < WORLD.marbleRadius || p.x > WORLD.width - WORLD.marbleRadius || p.y < WORLD.marbleRadius || p.y > WORLD.height - WORLD.marbleRadius) break;
+      if (l.obstacles.some((r) => r.h > WORLD.unit && pointInExpandedRect(p, r, WORLD.marbleRadius))) break;
+      if (l.enemies.some((e) => circlesOverlap(p, WORLD.marbleRadius, e, e.r))) break;
+      destination = { ...origin, x: p.x, y: p.y };
+    }
+    if (destination.x === origin.x && destination.y === origin.y) return run2;
+    return { ...run2, marble: destination, airborne: BOUNCE.airborneSeconds, jumpCooldown: BOUNCE.cooldownSeconds, jumpKind: charged ? "super" : "normal", superJumps: run2.superJumps - (charged ? 1 : 0) };
   }
   function step(run2, input2, dt) {
     if (run2.status !== "playing") return run2;
-    const active = input2.jump ? requestJump(run2, input2.super) : run2, l = LEVELS[active.levelIndex], m = { ...active.marble };
-    const terrain = l.features.find((f) => ["ice", "sticky"].includes(f.type) && circlesOverlap(m, WORLD.marbleRadius, f, f.r));
-    const drag = (terrain == null ? void 0 : terrain.type) === "ice" ? 0.97 : (terrain == null ? void 0 : terrain.type) === "sticky" ? 0.65 : 0.89;
-    m.vx = (m.vx + input2.x * 0.21 * dt * 60) * Math.pow(drag, dt * 60);
-    m.vy = (m.vy + input2.y * 0.21 * dt * 60) * Math.pow(drag, dt * 60);
+    const l = LEVELS[run2.levelIndex], m = { ...run2.marble };
+    const terrain = l.features.find((f) => ["ice", "sticky", "sand", "merry"].includes(f.type) && circlesOverlap(m, WORLD.marbleRadius, f, f.r));
+    const drag = (terrain == null ? void 0 : terrain.type) === "ice" ? 0.97 : (terrain == null ? void 0 : terrain.type) === "sticky" ? 0.65 : (terrain == null ? void 0 : terrain.type) === "sand" ? 0.55 : 0.89;
+    const dizzy = Math.max(0, run2.dizzy - dt), onMerry = (terrain == null ? void 0 : terrain.type) === "merry" && run2.airborne <= 0;
+    const steer = onMerry || dizzy > 0 ? { x: input2.y, y: -input2.x } : input2;
+    let gx = 0, gy = 0, gravity = false;
+    if (run2.difficulty !== "beginner" && run2.airborne <= 0) for (const f of l.features) {
+      if (f.type !== "pit") continue;
+      const dx = f.x - m.x, dy = f.y - m.y, dist = Math.hypot(dx, dy) || 1, reach = f.r + 75;
+      if (dist < reach) {
+        gravity = true;
+        const force = (run2.difficulty === "pro" ? 2 : 1) * 0.105 * (1 - dist / reach);
+        gx += dx / dist * force;
+        gy += dy / dist * force;
+      }
+    }
+    const steering = 1;
+    m.vx = (m.vx + steer.x * 0.21 * steering * dt * 60 + gx * dt * 60) * Math.pow(drag, dt * 60);
+    m.vy = (m.vy + steer.y * 0.21 * steering * dt * 60 + gy * dt * 60) * Math.pow(drag, dt * 60);
     const old = { ...m };
     m.x += m.vx * dt * 60;
     m.y += m.vy * dt * 60;
-    const mag = Math.hypot(input2.x, input2.y), lastDirection = mag > 0.1 ? { x: input2.x / mag, y: input2.y / mag } : active.lastDirection;
-    const enemies = moveEnemies(active.enemies, dt);
-    const powerups = active.powerups.map((p) => !p.collected && circlesOverlap(m, WORLD.marbleRadius, p, 14) ? { ...p, collected: true } : p);
-    const superJumps = active.superJumps + powerups.filter((p, i) => p.collected && !active.powerups[i].collected).length;
-    let hitWall = m.x < WORLD.marbleRadius || m.x > WORLD.width - WORLD.marbleRadius || m.y < WORLD.marbleRadius || m.y > WORLD.height - WORLD.marbleRadius;
+    const mag = Math.hypot(input2.x, input2.y), lastDirection = mag > 0.1 ? { x: input2.x / mag, y: input2.y / mag } : run2.lastDirection;
+    const enemies = moveEnemies(run2.enemies, dt);
+    let hitWall = false, exterior = false;
+    if (m.x < WORLD.marbleRadius || m.x > WORLD.width - WORLD.marbleRadius || m.y < WORLD.marbleRadius || m.y > WORLD.height - WORLD.marbleRadius) {
+      exterior = true;
+      const hitX = m.x < WORLD.marbleRadius || m.x > WORLD.width - WORLD.marbleRadius, hitY = m.y < WORLD.marbleRadius || m.y > WORLD.height - WORLD.marbleRadius;
+      m.x = clamp(m.x, WORLD.marbleRadius, WORLD.width - WORLD.marbleRadius);
+      m.y = clamp(m.y, WORLD.marbleRadius, WORLD.height - WORLD.marbleRadius);
+      if (run2.difficulty === "pro") hitWall = true;
+      else if (run2.difficulty === "standard") {
+        if (hitX) m.vx = -m.vx * 1.3;
+        if (hitY) m.vy = -m.vy * 1.3;
+      } else {
+        m.vx = 0;
+        m.vy = 0;
+      }
+    }
     for (const r of l.obstacles) {
-      if (collisionAllowed(r, active) || !pointInExpandedRect(m, r, WORLD.marbleRadius)) continue;
+      if (collisionAllowed(r, run2) || !pointInExpandedRect(m, r, WORLD.marbleRadius)) continue;
       if (r.type === "rebound") {
         Object.assign(m, reflected(m, old, r));
       } else hitWall = true;
@@ -83,9 +121,9 @@
     let pit = false, spikes = false;
     for (const f of l.features) {
       if (!circlesOverlap(m, WORLD.marbleRadius, f, f.r)) continue;
-      if (f.type === "pit" && active.airborne <= 0) pit = true;
-      if (f.type === "spikes" && active.airborne <= 0) spikes = true;
-      if (f.type === "bumper" && active.airborne <= 0) {
+      if (f.type === "pit" && run2.difficulty !== "beginner" && run2.airborne <= 0) pit = true;
+      if (f.type === "spikes" && run2.airborne <= 0) spikes = true;
+      if (f.type === "bumper" && run2.airborne <= 0) {
         const dx = m.x - f.x, dy = m.y - f.y, len = Math.hypot(dx, dy) || 1;
         m.x = f.x + dx / len * (f.r + WORLD.marbleRadius + 1);
         m.y = f.y + dy / len * (f.r + WORLD.marbleRadius + 1);
@@ -93,18 +131,23 @@
         m.vy = dy / len * 3;
       }
     }
-    const hitEnemy = active.airborne <= 0 && enemies.some((e) => circlesOverlap(m, WORLD.marbleRadius, e, e.r));
-    if (hitWall || pit || spikes || hitEnemy) return { ...active, lives: active.lives - 1, marble: { ...l.start, vx: 0, vy: 0 }, enemies, powerups, superJumps, lastDirection, status: active.lives <= 1 ? "lost" : "playing", failure: pit ? "fall" : failureFor(active), airborne: 0, jumpKind: null, jumpCooldown: 0 };
-    if (circlesOverlap(m, WORLD.marbleRadius, l.goal, WORLD.goalRadius)) return { ...active, marble: m, enemies, powerups, superJumps, status: active.levelIndex === LEVELS.length - 1 ? "won" : "cleared" };
-    const remaining = Math.max(0, active.remaining - dt), airborne = Math.max(0, active.airborne - dt);
-    return { ...active, marble: m, enemies, powerups, superJumps, remaining, lastDirection, airborne, jumpCooldown: Math.max(0, active.jumpCooldown - dt), jumpKind: airborne > 0 ? active.jumpKind : null, status: remaining === 0 ? "lost" : "playing", failure: remaining === 0 ? failureFor(active) : active.failure };
+    const powerups = run2.powerups.map((p) => !p.collected && circlesOverlap(m, WORLD.marbleRadius, p, 14) ? { ...p, collected: true } : p);
+    const superJumps = run2.superJumps + powerups.filter((p, i) => p.collected && !run2.powerups[i].collected).length;
+    const hitEnemy = run2.airborne <= 0 && enemies.some((e) => circlesOverlap(m, WORLD.marbleRadius, e, e.r));
+    if (hitWall || pit || spikes || hitEnemy) return { ...run2, lives: run2.lives - 1, marble: { ...l.start, vx: 0, vy: 0 }, enemies, powerups, superJumps, lastDirection, status: run2.lives <= 1 ? "lost" : "playing", failure: pit ? "fall" : exterior ? "spikes" : failureFor(run2), airborne: 0, jumpKind: null, jumpCooldown: 0, dizzy: 0, terrain: null, gravity: false };
+    if (circlesOverlap(m, WORLD.marbleRadius, l.goal, WORLD.goalRadius)) return { ...run2, marble: m, enemies, powerups, superJumps, status: run2.levelIndex === LEVELS.length - 1 ? "won" : "cleared" };
+    const remaining = Math.max(0, run2.remaining - dt), airborne = Math.max(0, run2.airborne - dt);
+    return { ...run2, marble: m, enemies, powerups, superJumps, remaining, lastDirection, airborne, jumpCooldown: Math.max(0, run2.jumpCooldown - dt), jumpKind: airborne > 0 ? run2.jumpKind : null, status: remaining === 0 ? "lost" : "playing", failure: remaining === 0 ? failureFor(run2) : run2.failure, dizzy: onMerry ? Math.max(dizzy, 0.75) : dizzy, terrain: (terrain == null ? void 0 : terrain.type) || null, gravity };
   }
   function nextLevel(run2) {
-    return newRun(Math.min(run2.levelIndex + 1, LEVELS.length - 1));
+    return newRun(Math.min(run2.levelIndex + 1, LEVELS.length - 1), run2.difficulty);
   }
   function cameraFor(run2, viewportHeight = VIEWPORT.height) {
     const look = run2.lastDirection.y < -0.15 ? CAMERA_LEAD.forward : run2.lastDirection.y > 0.15 ? CAMERA_LEAD.backward : CAMERA_LEAD.neutral;
     return Math.max(0, Math.min(WORLD.height - viewportHeight, run2.marble.y - viewportHeight / 2 + look));
+  }
+  function smoothCamera(current, target, dt) {
+    return current + (target - current) * (1 - Math.exp(-9 * Math.max(0, dt)));
   }
 
   // app.js
@@ -120,7 +163,7 @@
   var dpad = $("#dpad");
   var bounceButton = $("#bounce");
   var run = newRun();
-  var input = { x: 0, y: 0, jump: false, super: false };
+  var input = { x: 0, y: 0 };
   var last = performance.now();
   var tiltActive = false;
   var manualPause = false;
@@ -129,8 +172,12 @@
   var audioOn = true;
   var audio = null;
   var failUntil = 0;
+  var camera = cameraFor(run);
+  var transition = null;
+  var bouncePress = null;
+  var selectedDifficulty = "standard";
   var keys = /* @__PURE__ */ new Set();
-  var clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  var clamp2 = (v, a, b) => Math.max(a, Math.min(b, v));
   var playing = () => phase === "playing" && !menuOpen && !manualPause;
   function sound(kind) {
     if (!audioOn || !playing()) return;
@@ -177,11 +224,14 @@
     input.x = (keys.has("ArrowRight") || keys.has("d") ? 1 : 0) - (keys.has("ArrowLeft") || keys.has("a") ? 1 : 0);
     input.y = (keys.has("ArrowDown") || keys.has("s") ? 1 : 0) - (keys.has("ArrowUp") || keys.has("w") ? 1 : 0);
   }
-  function jump(superJump = false) {
-    if (!playing()) return;
-    input.jump = true;
-    input.super = superJump;
-    sound(superJump ? "super" : "jump");
+  function jump(heldMs = 0) {
+    if (!playing() || run.status !== "playing" || transition) return;
+    const next = requestJump(run, heldMs);
+    if (next === run) return;
+    const distance = Math.round(Math.hypot(next.marble.x - run.marble.x, next.marble.y - run.marble.y));
+    run = next;
+    sound(next.jumpKind === "super" ? "super" : "jump");
+    notice.textContent = `${next.jumpKind === "super" ? "super \xB7 " : ""}${heldMs >= BOUNCE.holdMs ? "long" : "tap"} ${(distance / WORLD.unit).toFixed(1)} units`;
   }
   addEventListener("keydown", (e) => {
     if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d"].includes(e.key)) {
@@ -189,9 +239,9 @@
       keys.add(e.key);
       updateKeyboard();
     }
-    if (e.key === " ") {
+    if (e.key === " " && !e.repeat) {
       e.preventDefault();
-      jump(e.shiftKey);
+      bouncePress = { keyboard: true, start: performance.now() };
     }
     if (e.key === "Escape" && phase === "playing") {
       menuOpen = !menuOpen;
@@ -201,9 +251,13 @@
   addEventListener("keyup", (e) => {
     keys.delete(e.key);
     updateKeyboard();
+    if (e.key === " " && (bouncePress == null ? void 0 : bouncePress.keyboard)) {
+      jump(performance.now() - bouncePress.start);
+      bouncePress = null;
+    }
   });
   canvas.addEventListener("pointerdown", (e) => {
-    if (!playing() || tiltActive) return;
+    if (!playing() || tiltActive || transition) return;
     const r = canvas.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * VIEWPORT.width, y = (e.clientY - r.top) / r.height * VIEWPORT.height;
     input = { ...input, x: Math.abs(x - VIEWPORT.width / 2) > Math.abs(y - VIEWPORT.height / 2) ? Math.sign(x - VIEWPORT.width / 2) : 0, y: Math.abs(y - VIEWPORT.height / 2) >= Math.abs(x - VIEWPORT.width / 2) ? Math.sign(y - VIEWPORT.height / 2) : 0 };
     music();
@@ -246,10 +300,11 @@
   }
   addEventListener("deviceorientation", (e) => {
     if (!tiltActive || e.gamma == null || e.beta == null || !playing()) return;
-    input.x = clamp(e.gamma / 25, -1, 1);
-    input.y = clamp(e.beta / 25, -1, 1);
+    input.x = clamp2(e.gamma / 25, -1, 1);
+    input.y = clamp2(e.beta / 25, -1, 1);
   });
   function showPhase(next) {
+    cancelBounce();
     phase = next;
     $("#splash").hidden = next !== "splash";
     $("#start-menu").hidden = next !== "menu";
@@ -262,14 +317,24 @@
     syncMenu();
   }
   function startGame() {
-    run = newRun();
+    run = newRun(0, selectedDifficulty);
+    camera = cameraFor(run);
     manualPause = false;
     showPhase("playing");
+    transition = { kind: "enter", start: performance.now(), duration: 650 };
+    notice.textContent = `enter ${LEVELS[0].name}`;
     music();
     resumeAudio();
     syncUI();
   }
   function syncMenu() {
+    if (menuOpen) {
+      cancelBounce();
+      if (transition && !transition.pausedAt) transition.pausedAt = performance.now();
+    } else if (transition == null ? void 0 : transition.pausedAt) {
+      transition.start += performance.now() - transition.pausedAt;
+      transition.pausedAt = 0;
+    }
     const visible = phase === "playing" && menuOpen;
     $("#menu").hidden = !visible;
     $("#waffle").setAttribute("aria-expanded", String(visible));
@@ -304,14 +369,32 @@
     });
     for (const eventName of ["pointerup", "pointercancel", "lostpointercapture"]) button.addEventListener(eventName, () => setPadDirection(direction, false));
   }
+  function cancelBounce() {
+    bouncePress = null;
+    bounceButton.classList.remove("charging");
+  }
   bounceButton.addEventListener("pointerdown", (event) => {
+    var _a;
     event.preventDefault();
-    jump(run.superJumps > 0);
+    if (!playing()) return;
+    bouncePress = { id: event.pointerId, start: performance.now() };
+    (_a = bounceButton.setPointerCapture) == null ? void 0 : _a.call(bounceButton, event.pointerId);
+    bounceButton.classList.add("charging");
     music();
   });
+  bounceButton.addEventListener("pointerup", (event) => {
+    if ((bouncePress == null ? void 0 : bouncePress.id) !== event.pointerId) return;
+    const held = performance.now() - bouncePress.start;
+    cancelBounce();
+    jump(held);
+  });
+  for (const name of ["pointercancel", "lostpointercapture"]) bounceButton.addEventListener(name, () => cancelBounce());
   tiltButton.onclick = enableTilt;
   $("#restart").onclick = () => {
-    run = newRun();
+    cancelBounce();
+    transition = null;
+    run = newRun(0, selectedDifficulty);
+    camera = cameraFor(run);
     input.x = 0;
     input.y = 0;
     manualPause = false;
@@ -321,6 +404,7 @@
     music();
   };
   $("#pause").onclick = () => {
+    cancelBounce();
     manualPause = !manualPause;
     if (manualPause) freezeAudio();
     else resumeAudio();
@@ -337,6 +421,9 @@
   $("#waffle").onclick = toggleMenu;
   $("#close-menu").onclick = toggleMenu;
   $("#resume").onclick = toggleMenu;
+  $("#difficulty").onchange = (e) => {
+    selectedDifficulty = e.target.value;
+  };
   var continueToMenu = () => showPhase("menu");
   $("#continue").onclick = continueToMenu;
   $("#splash").addEventListener("pointerup", (e) => {
@@ -357,7 +444,8 @@
     levelText.textContent = `${String(run.levelIndex + 1).padStart(2, "0")} ${l.name}`;
     livesText.textContent = "\u25CF ".repeat(run.lives).trim() || "\u2014";
     timerText.textContent = run.remaining.toFixed(1);
-    bounceButton.textContent = run.superJumps > 0 ? `super \xD7${run.superJumps}` : "bounce";
+    bounceButton.textContent = bouncePress ? performance.now() - bouncePress.start >= BOUNCE.holdMs ? "long" : "hold" : run.superJumps > 0 ? `super \xD7${run.superJumps}` : "bounce";
+    $("#effect").textContent = [run.gravity ? "pull" : null, run.terrain === "sand" ? "sand slow" : null, run.dizzy > 0 ? "dizzy" : null].filter(Boolean).join(" \xB7 ");
     bounceButton.setAttribute("aria-label", run.superJumps > 0 ? "super bounce" : "bounce");
     $("#pause").textContent = manualPause ? "resume" : "pause";
   }
@@ -373,7 +461,6 @@
     ctx.fillRect(0, 0, 240, 282);
     ctx.save();
     ctx.scale(240 / VIEWPORT.width, 282 / VIEWPORT.height);
-    const camera = cameraFor(run, VIEWPORT.height);
     ctx.translate(0, -camera);
     ctx.strokeStyle = line;
     ctx.lineWidth = 1;
@@ -401,9 +488,24 @@
     });
     l.features.forEach((f) => {
       if (f.type === "pit") {
+        if (run.difficulty === "beginner") return;
+        ctx.strokeStyle = "#b66ad0";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.r + 8, 0, Math.PI * 1.7);
+        ctx.stroke();
         circle(f.x, f.y, f.r + 3, "#c45bdb");
         circle(f.x, f.y, f.r, "#040308");
         circle(f.x - 5, f.y - 6, 2, "#86539d");
+      } else if (f.type === "sand") {
+        circle(f.x, f.y, f.r, "#b69351");
+        circle(f.x - 6, f.y + 4, 2, "#f4dc91");
+      } else if (f.type === "merry") {
+        circle(f.x, f.y, f.r, "#64b7cf");
+        ctx.strokeStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, 11, performance.now() / 500, performance.now() / 500 + 4);
+        ctx.stroke();
       } else if (f.type === "ice") {
         circle(f.x, f.y, f.r, "#85d8f0");
         ctx.fillStyle = "#fff";
@@ -471,16 +573,43 @@
       ctx.globalAlpha = 1;
     }
     ctx.restore();
+    if (transition) {
+      const t = Math.min(1, ((transition.pausedAt || performance.now()) - transition.start) / transition.duration);
+      ctx.save();
+      ctx.translate(120, 141);
+      ctx.rotate(t * Math.PI * 2);
+      ctx.strokeStyle = "#ffca43";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(0, 0, 12 + 90 * t, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle = `rgba(6,3,18,${transition.kind === "exit" ? t * 0.75 : (1 - t) * 0.75})`;
+      ctx.fillRect(0, 0, 240, 282);
+    }
   }
   function frame(now) {
     const dt = Math.min(0.04, (now - last) / 1e3);
     last = now;
     const previous = run;
-    if (playing() && run.status === "playing") {
-      run = step(run, input, dt);
-      input.jump = false;
-      input.super = false;
+    if (transition && playing()) {
+      const elapsed = now - transition.start;
+      if (elapsed >= transition.duration) {
+        if (transition.kind === "exit") {
+          run = nextLevel(run);
+          camera = cameraFor(run);
+          transition = { kind: "enter", start: now, duration: 650 };
+          notice.textContent = `enter ${LEVELS[run.levelIndex].name}`;
+        } else {
+          const finished = transition.kind;
+          transition = null;
+          if (finished === "victory") manualPause = true;
+          else notice.textContent = "";
+          resumeAudio();
+        }
+      }
     }
+    if (playing() && !transition && run.status === "playing") run = step(run, input, dt);
     if (run.failure && run.lives < previous.lives) {
       failUntil = now + 600;
       sound("hit");
@@ -490,24 +619,23 @@
       sound("pickup");
       notice.textContent = "super bounce charged";
     }
-    if (phase === "playing" && run.status === "cleared") {
+    if (!transition && run.status === "cleared") {
+      cancelBounce();
+      transition = { kind: "exit", start: now, duration: 650 };
       notice.textContent = `level clear \xB7 ${LEVELS[run.levelIndex + 1].name}`;
-      manualPause = true;
       sound("win");
-      setTimeout(() => {
-        run = nextLevel(run);
-        manualPause = false;
-        notice.textContent = "";
-        resumeAudio();
-      }, 900);
-    } else if (run.status === "won") {
+    } else if (!transition && run.status === "won" && !manualPause) {
+      cancelBounce();
+      transition = { kind: "victory", start: now, duration: 650 };
       notice.textContent = "all four long runs cleared";
-      manualPause = true;
       sound("win");
+    } else if (run.status === "won" && !transition) {
+      manualPause = true;
     } else if (run.status === "lost") {
       notice.textContent = `${run.failure || "run"} ended \xB7 restart to try again`;
       manualPause = true;
     }
+    camera = smoothCamera(camera, cameraFor(run), dt);
     syncUI();
     draw();
     requestAnimationFrame(frame);
