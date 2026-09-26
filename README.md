@@ -1,23 +1,32 @@
 # Marble Madness · Rabbit R1 Creation
 
-A portrait-first, playful tilt maze for Rabbit R1. Roll a vivid marble through four progressively longer runs. The camera looks ahead in the direction of travel, so the next choice is visible before the marble reaches it. Walls and moving opponents cost a life; tangent contact remains safe.
+A portrait-first tilt maze for Rabbit R1. Roll a vivid marble through four longer runs; the **fixed 240×282 R1 game frame stays in place** while the larger maze scrolls beneath it with directional camera look-ahead. Walls and moving opponents cost a life; tangent contact remains safe.
 
-## controls and options
+## fixed R1 display and controls
 
-- **waffle menu:** the in-board `▦` control exposes every game action and option: bounce, super bounce, tilt, audio, pause, and restart.
-- **bounce:** clears one board-unit-high obstacle and travels one board unit in the marble's last steering direction.
-- **super bounce:** collect orange star orbs, then use **super bounce** to clear and travel up to three board units. It consumes one charge.
-- **R1 sensor path:** choose **enable tilt**. The browser requests orientation permission where required and maps `DeviceOrientationEvent.gamma` to horizontal steering and `beta` to vertical steering, with clamping.
+The page is a single, non-scrolling **240×282** game shell sized for the cited R1 display footprint. The canvas is fixed inside that shell. HUD, notice, tilt button, and waffle button are overlays inside the frame, so controls do not expand the device display. Only the world/map translates when the camera follows the marble.
+
+- **tilt:** the visible `tilt` button at the lower-left of the frame is always available. Tap it to enable the existing motion-control path. Its status is repeated in the waffle menu.
+- **waffle menu:** the in-frame `▦` button exposes bounce, super bounce, audio, pause, restart, display mode, and control/status help.
 - **desktop fallback:** arrow keys or WASD steer; tap/hold a board edge to simulate tilt. Space triggers bounce; Shift+Space triggers super bounce.
-- **audio:** enabled from the waffle menu after a user gesture. The game uses lightweight Web Audio synthesized tones for background pulses, jumps, pickups, collisions, and clears. Choose **audio off** to mute.
+- **bounce:** clears one board-unit-high obstacle and travels one board unit in the last steering direction.
+- **super bounce:** collect orange star orbs, then use **super bounce** to clear and travel up to three board units. It consumes one charge.
+- **audio:** starts from a user gesture and uses lightweight Web Audio synthesized pulses, jumps, pickups, collisions, and clears. It fails gracefully and can be muted.
+
+## sensor path and limitation
+
+This Creation preserves its browser-standard motion path rather than claiming an undocumented Rabbit-specific API:
+
+1. Tap **tilt** in the fixed game frame.
+2. If the runtime implements `DeviceOrientationEvent.requestPermission()`, the game requests it from that button's user gesture and accepts only `granted`.
+3. While enabled, `DeviceOrientationEvent.gamma` maps to horizontal steering and `beta` maps to vertical steering; both values are clamped.
+4. If the API, permission, or events are unavailable, the game states that tilt is unavailable and leaves keyboard/pointer controls ready.
+
+The current official public Creations page describes QR-installed R1-optimized creations, but it does not document a dedicated Creation accelerometer/sensor SDK or a Rabbit-specific motion contract. The physical R1 sensor path is therefore **not verified** by this release; automated checks simulate the game input/state path only. The browser must serve the Creation over HTTPS for permission-capable runtimes.
 
 ## gameplay and fairness
 
-The board is 1,400 units tall while the viewport is 520 units tall. Longer routes and moving hazards expand across the four levels. Normal bounce passes only obstacles no taller than one board unit. Super bounce allows up to three units. Enemies cannot be cleared by bouncing; the player must route around them. Collision randomly presents one of three playful visual failures: explosion, crumble, or melt.
-
-## sensor assessment and constraint
-
-The public Rabbit Creations material does not publish a dedicated R1 accelerometer SDK or sensor contract. This project uses only browser-standard `DeviceOrientationEvent` when the deployed R1 creation web view exposes it and permission is granted. It does not claim proprietary accelerometer, crown, haptics, physical tilt, or physical audio support.
+The world is 1,400 logical units tall and the logical camera window is 320×376 (scaled into the 240×282 physical frame). Longer routes and moving hazards expand across four levels. Normal bounce passes only obstacles no taller than one board unit. Super bounce allows up to three units. Enemies cannot be cleared by bouncing; route around them. Collision presents explosion, crumble, or melt failures.
 
 ## local run and test
 
@@ -30,10 +39,10 @@ node --check game.js
 node test.mjs
 ```
 
-The simulated tests cover scrolling camera bounds/look-ahead, normal and super-bounce distances, power consumption, collision/failure state, progression, timer loss, and desktop fallback. Browser testing additionally covers the visible waffle controls and audio mute state. Physical R1 tilt and audio remain pending on-device verification.
+The simulated tests cover the fixed viewport bounds and physical dimensions, scrolling camera/look-ahead, normal and super-bounce distances, power consumption, collision/failure states, progression, timer loss, and desktop fallback. Manual browser checks cover the fixed shell, in-frame waffle menu, visible tilt control, pointer fallback, and permission-state messaging. They do not prove physical R1 motion or audio.
 
 ## published creation
 
 The HTTPS-hosted Creation is at `https://geekthegreybeard.github.io/r1-marble-madness/`.
 
-`marble-madness-r1-card.json` is the Creation-card configuration and `marble-madness-r1-install-qr.png` encodes that exact configuration. On the R1, use **Creations card → Create tab → Add via QR code**, then scan the QR. Installation and physical-device behavior are unverified until scanned and tested.
+`marble-madness-r1-card.json` is the Creation-card configuration and `marble-madness-r1-install-qr.png` encodes that exact configuration. On R1, use **Creations card → Create tab → Add via QR code**, then scan the QR. Installation and physical-device behavior remain unverified until scanned and tested on-device.
