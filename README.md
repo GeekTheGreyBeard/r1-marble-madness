@@ -1,13 +1,13 @@
 # Marble Madness · Rabbit R1 Creation
 
-A portrait-first tilt maze for Rabbit R1. Roll a vivid marble through four longer runs; the **fixed 240×282 R1 game frame stays in place** while the larger maze scrolls beneath it with directional camera look-ahead. Walls and moving opponents cost a life; tangent contact remains safe.
+A portrait-first tilt maze for Rabbit R1. Roll a vivid marble through four longer runs; the **fixed 240×282 R1 game frame stays in place** while the larger maze scrolls beneath it. The marble remains near the center of the display with only a modest forward look-ahead. Walls and moving opponents cost a life; tangent contact remains safe.
 
-## fixed R1 display and controls
+## launch flow and fixed display
 
-The page is a single, non-scrolling **240×282** game shell sized for the cited R1 display footprint. The canvas is fixed inside that shell. HUD, notice, tilt button, and waffle button are overlays inside the frame, so controls do not expand the device display. Only the world/map translates when the camera follows the marble.
+The page is a single, non-scrolling **240×282** game shell. The game begins on a Marble Madness splash screen. Tap to continue, then choose **start game** from the main menu. Once running, the board fills the usable display; its compact HUD and controls are overlays, not a header or separate frame.
 
-- **tilt:** the visible `tilt` button at the lower-left of the frame is always available. Tap it to enable the existing motion-control path. Its status is repeated in the waffle menu.
-- **waffle menu:** the in-frame `▦` button exposes bounce, super bounce, audio, pause, restart, display mode, and control/status help.
+- **waffle menu:** tap `☰` during play to open a full overlay above the board. It pauses simulation, timer, synthesized audio, and input. Choose **continue**, the close control, or press Escape to dismiss it and resume.
+- **tilt:** the visible `tilt` button at the lower-left is available while playing. Tap it to enable the browser-standard motion-control path. Its state is repeated in the waffle menu.
 - **desktop fallback:** arrow keys or WASD steer; tap/hold a board edge to simulate tilt. Space triggers bounce; Shift+Space triggers super bounce.
 - **bounce:** clears one board-unit-high obstacle and travels one board unit in the last steering direction.
 - **super bounce:** collect orange star orbs, then use **super bounce** to clear and travel up to three board units. It consumes one charge.
@@ -22,11 +22,11 @@ This Creation preserves its browser-standard motion path rather than claiming an
 3. While enabled, `DeviceOrientationEvent.gamma` maps to horizontal steering and `beta` maps to vertical steering; both values are clamped.
 4. If the API, permission, or events are unavailable, the game states that tilt is unavailable and leaves keyboard/pointer controls ready.
 
-The current official public Creations page describes QR-installed R1-optimized creations, but it does not document a dedicated Creation accelerometer/sensor SDK or a Rabbit-specific motion contract. The physical R1 sensor path is therefore **not verified** by this release; automated checks simulate the game input/state path only. The browser must serve the Creation over HTTPS for permission-capable runtimes.
+The physical R1 sensor and audio paths are **not verified** by this release. Automated checks simulate the game input/state path only. The browser must serve the Creation over HTTPS for permission-capable runtimes.
 
 ## gameplay and fairness
 
-The world is 1,400 logical units tall and the logical camera window is 320×376 (scaled into the 240×282 physical frame). Longer routes and moving hazards expand across four levels. Normal bounce passes only obstacles no taller than one board unit. Super bounce allows up to three units. Enemies cannot be cleared by bouncing; route around them. Collision presents explosion, crumble, or melt failures.
+The world is 1,400 logical units tall and the logical camera window is 320×376 (scaled into the 240×282 physical frame). The map translates internally; neither the physical frame nor its canvas expands. Four progressive routes add moving hazards and power-ups. Normal bounce passes only obstacles no taller than one board unit. Super bounce allows up to three units. Enemies cannot be cleared by bouncing; route around them. Collision presents explosion, crumble, or melt failures.
 
 ## local run and test
 
@@ -39,7 +39,7 @@ node --check game.js
 node test.mjs
 ```
 
-The simulated tests cover the fixed viewport bounds and physical dimensions, scrolling camera/look-ahead, normal and super-bounce distances, power consumption, collision/failure states, progression, timer loss, and desktop fallback. Manual browser checks cover the fixed shell, in-frame waffle menu, visible tilt control, pointer fallback, and permission-state messaging. They do not prove physical R1 motion or audio.
+The checks cover the startup/menu markers, menu pause model, fixed physical viewport values, centered scrolling camera/look-ahead, normal and super-bounce distances, power consumption, collision/failure states, progression, timer loss, and desktop fallback. Manual browser checks remain necessary for physical R1 motion and audio.
 
 ## published creation
 
