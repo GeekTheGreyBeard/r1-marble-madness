@@ -38,3 +38,15 @@ The automated tests are simulated JavaScript tests. They cover level escalation,
 - `game.js` — deterministic game physics and level data
 - `styles.css` — responsive portrait visual system and theme toggle
 - `test.mjs` — simulated logic tests
+
+## published creation
+
+The HTTPS-hosted Creation is available at:
+
+`https://geekthegreybeard.github.io/r1-marble-madness/`
+
+`marble-madness-r1-card.json` is the R1 Creation-card configuration and
+`marble-madness-r1-install-qr.png` encodes that exact configuration for later
+installation. On the R1, open **Creations card → Create tab → Add via QR code**,
+then scan the displayed QR image. Installation and on-device sensor behavior
+remain unverified until that scan and device test occur.
