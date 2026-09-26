@@ -1,52 +1,39 @@
 # Marble Madness · Rabbit R1 Creation
 
-A portrait-first tilt maze for Rabbit R1. Guide the steel marble to the orange exit through four increasingly difficult mazes. Walls and moving opponents cost one life; tangent contact is intentionally safe, so a player is not punished for a near miss. Each level grants three lives and restarts at its start after a collision.
+A portrait-first, playful tilt maze for Rabbit R1. Roll a vivid marble through four progressively longer runs. The camera looks ahead in the direction of travel, so the next choice is visible before the marble reaches it. Walls and moving opponents cost a life; tangent contact remains safe.
 
-## controls
+## controls and options
 
-- **R1 sensor path:** select **enable tilt**. The app requests browser orientation permission when the runtime requires it, then maps `DeviceOrientationEvent.gamma` to horizontal steering and `beta` to vertical steering. Values are capped to prevent extreme input.
-- **R1 controls:** pause and restart are visible 44px targets. They remain accessible by touch; the R1 crown can move focus to them where the R1 web runtime maps crown movement to browser focus.
-- **desktop fallback:** arrow keys or WASD steer. Click/tap and hold toward an edge of the board to simulate a tilt direction.
+- **waffle menu:** the in-board `▦` control exposes every game action and option: bounce, super bounce, tilt, audio, pause, and restart.
+- **bounce:** clears one board-unit-high obstacle and travels one board unit in the marble's last steering direction.
+- **super bounce:** collect orange star orbs, then use **super bounce** to clear and travel up to three board units. It consumes one charge.
+- **R1 sensor path:** choose **enable tilt**. The browser requests orientation permission where required and maps `DeviceOrientationEvent.gamma` to horizontal steering and `beta` to vertical steering, with clamping.
+- **desktop fallback:** arrow keys or WASD steer; tap/hold a board edge to simulate tilt. Space triggers bounce; Shift+Space triggers super bounce.
+- **audio:** enabled from the waffle menu after a user gesture. The game uses lightweight Web Audio synthesized tones for background pulses, jumps, pickups, collisions, and clears. Choose **audio off** to mute.
+
+## gameplay and fairness
+
+The board is 1,400 units tall while the viewport is 520 units tall. Longer routes and moving hazards expand across the four levels. Normal bounce passes only obstacles no taller than one board unit. Super bounce allows up to three units. Enemies cannot be cleared by bouncing; the player must route around them. Collision randomly presents one of three playful visual failures: explosion, crumble, or melt.
 
 ## sensor assessment and constraint
 
-The public Rabbit Creations gallery describes creations as experiences made for and installed on R1, but its currently exposed page does not publish a dedicated, documented R1 accelerometer SDK or sensor contract. This project therefore uses the browser-standard `DeviceOrientationEvent` only when the deployed R1 creation web view exposes it and permission is granted. It does **not** claim access to a proprietary R1 accelerometer API, raw accelerometer samples, the crown, or haptics. If orientation is unavailable, denied, or not forwarded by the R1 runtime, the on-screen desktop-style fallback remains playable.
+The public Rabbit Creations material does not publish a dedicated R1 accelerometer SDK or sensor contract. This project uses only browser-standard `DeviceOrientationEvent` when the deployed R1 creation web view exposes it and permission is granted. It does not claim proprietary accelerometer, crown, haptics, physical tilt, or physical audio support.
 
-Before installing on R1, host this folder over HTTPS and verify the creation runtime provides device orientation events. On-device validation should cover permission behavior, the axis signs in portrait orientation, sensitivity, and whether crown navigation reaches the controls. No GitHub repository, public gallery entry, Rabbit resource, or credits were created.
-
-## local run
+## local run and test
 
 ```sh
 cd /home/gtgb/OS3/r1-marble-madness
 python3 -m http.server 8000
-```
-
-Open `http://localhost:8000`.
-
-## test
-
-```sh
+# separately
+node --check app.js
+node --check game.js
 node test.mjs
 ```
 
-The automated tests are simulated JavaScript tests. They cover level escalation, wall/opponent geometry helpers, safe tangent contacts, respawn/life rules, clear/win progression, timer loss, and the normalized keyboard/touch input path. They do not verify an R1 device sensor.
-
-## project layout
-
-- `index.html` — portrait game shell and R1 controls
-- `app.js` — rendering, controls, browser orientation adapter, pause/restart
-- `game.js` — deterministic game physics and level data
-- `styles.css` — responsive portrait visual system and theme toggle
-- `test.mjs` — simulated logic tests
+The simulated tests cover scrolling camera bounds/look-ahead, normal and super-bounce distances, power consumption, collision/failure state, progression, timer loss, and desktop fallback. Browser testing additionally covers the visible waffle controls and audio mute state. Physical R1 tilt and audio remain pending on-device verification.
 
 ## published creation
 
-The HTTPS-hosted Creation is available at:
+The HTTPS-hosted Creation is at `https://geekthegreybeard.github.io/r1-marble-madness/`.
 
-`https://geekthegreybeard.github.io/r1-marble-madness/`
-
-`marble-madness-r1-card.json` is the R1 Creation-card configuration and
-`marble-madness-r1-install-qr.png` encodes that exact configuration for later
-installation. On the R1, open **Creations card → Create tab → Add via QR code**,
-then scan the displayed QR image. Installation and on-device sensor behavior
-remain unverified until that scan and device test occur.
+`marble-madness-r1-card.json` is the Creation-card configuration and `marble-madness-r1-install-qr.png` encodes that exact configuration. On the R1, use **Creations card → Create tab → Add via QR code**, then scan the QR. Installation and physical-device behavior are unverified until scanned and tested.
