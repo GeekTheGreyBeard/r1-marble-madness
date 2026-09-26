@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { WORLD,VIEWPORT,LEVELS,newRun,step,nextLevel,circlesOverlap,pointInExpandedRect,requestJump,cameraFor,smoothCamera,CAMERA_LEAD,BOUNCE,DIFFICULTIES } from './game.js';
+import { WORLD,VIEWPORT,LEVELS,newRun,step,nextLevel,circlesOverlap,pointInExpandedRect,requestJump,cameraFor,smoothCamera,CAMERA_LEAD,BOUNCE,BOMB,DIFFICULTIES } from './game.js';
 import fs from 'node:fs';
 assert.equal(LEVELS.length,4,'four progressive levels');assert.ok(LEVELS[3].obstacles.length>LEVELS[0].obstacles.length,'later levels add challenges');assert.equal(VIEWPORT.physicalWidth,240,'R1 viewport is 240 pixels wide');assert.equal(VIEWPORT.physicalHeight,282,'R1 viewport is 282 pixels tall');assert.ok(WORLD.height>VIEWPORT.height,'world is larger than fixed viewport');assert.equal(circlesOverlap({x:0,y:0},10,{x:20,y:0},10),false,'tangent contact is safe');assert.equal(pointInExpandedRect({x:95,y:50},{x:100,y:40,w:30,h:20},6),true,'wall collision includes marble radius');
 let run=newRun();assert.ok(cameraFor(run)<=WORLD.height-VIEWPORT.height,'camera starts in fixed-viewport bounds');run={...run,marble:{...run.marble,y:800},lastDirection:{x:0,y:-1}};const centeredCamera=cameraFor(run);assert.ok(centeredCamera<800,'look-ahead shows travel direction');assert.ok(Math.abs((run.marble.y-centeredCamera)-VIEWPORT.height/2)<=CAMERA_LEAD.forward,'marble remains centered-ish with modest lead');assert.ok(cameraFor({...run,marble:{...run.marble,y:WORLD.height}})<=WORLD.height-VIEWPORT.height,'camera never exposes space below the world');
@@ -83,3 +83,68 @@ assert.equal(dizzyRun.lives,3);assert.ok(dizzyRun.dizzy>0);assert.ok(dizzyRun.ma
 assert.ok(smoothCamera(0,100,1/60)>0&&smoothCamera(0,100,1/60)<100,'camera eases rather than snapping');
 assert.match(app,/transition=\{kind:'enter'/,'entry warp');assert.match(app,/transition=\{kind:'exit'/,'completion warp');assert.match(app,/transition=\{kind:'victory'/,'final warp');
 console.log('three difficulty levels, hazards, gravity, bounce thresholds, swept collision, camera and warp: ok');
+
+// A clearance-aware static route certificate for all modes: excludes all lethal
+// obstacles, active pits, spikes, enemy swept ranges, and bomb blast zones.
+// A bomb is avoidable, so conservative clearance is stronger than waiting it out.
+function route(l,difficulty,edgeOnly=false){
+  const cell=8,cols=39,rows=174, r=WORLD.marbleRadius;
+  const key=(x,y)=>y*cols+x, xy=i=>({x:12+(i%cols)*cell,y:12+Math.floor(i/cols)*cell});
+  const blocked=p=>l.obstacles.some(o=>o.type!=='rebound'&&pointInExpandedRect(p,o,r+1)) ||
+    l.features.some(f=>(f.type==='spikes'||(difficulty!=='beginner'&&f.type==='pit'))&&circlesOverlap(p,r+2,f,f.r)) ||
+    l.bombs.some(b=>circlesOverlap(p,r+2,b,BOMB.blastRadius)) ||
+    l.enemies.some(e=>Math.hypot(p.x-e.x,p.y-e.y)<r+e.r+4+(e.axis==='x'?e.span:0) && (e.axis!=='y'||Math.abs(p.y-e.y)<e.span+r+e.r+4));
+  const a=key(Math.round((l.start.x-12)/cell),Math.round((l.start.y-12)/cell)), q=[a],prev=new Int32Array(cols*rows).fill(-1);prev[a]=a;
+  for(let qi=0;qi<q.length;qi++){
+    const i=q[qi],p=xy(i);
+    if(circlesOverlap(p,r,l.goal,WORLD.goalRadius)){let path=[];for(let k=i;k!==a;k=prev[k])path.push(xy(k));path.push(xy(a));return path.reverse()}
+    for(const [dx,dy] of [[0,-1],[0,1],[-1,0],[1,0]]){
+      const x=i%cols+dx,y=Math.floor(i/cols)+dy;if(x<0||x>=cols||y<0||y>=rows)continue;
+      const j=key(x,y),n=xy(j);if(prev[j]!==-1||blocked(n)||edgeOnly&&n.x>36&&n.x<284)continue;
+      prev[j]=i;q.push(j);
+    }
+  }
+  return null;
+}
+for(const [i,l] of LEVELS.entries())for(const difficulty of DIFFICULTIES){
+  assert.equal(route(l,difficulty,true),null,`${l.name}/${difficulty}: outside rails cannot finish`);
+  const path=route(l,difficulty);assert.ok(path,`${l.name}/${difficulty}: a collision-clear field route exists`);
+  assert.ok(path.some(p=>p.x>100&&p.x<220),`${l.name}/${difficulty}: route traverses interior`);
+}
+const bomb=LEVELS[0].bombs[0], prepared=(x,y,extra={})=>({...newRun(),...extra,marble:{x,y,vx:0,vy:0}});
+let armed=step(prepared(bomb.x,bomb.y),{x:0,y:0},0);
+assert.equal(armed.bombs[0].phase,'fuse');assert.equal(armed.lives,3);
+armed=step(armed,{x:0,y:0},BOMB.fuseSeconds-.01);assert.equal(armed.bombs[0].phase,'fuse');assert.equal(armed.lives,3);
+let blast=step(armed,{x:0,y:0},.02);assert.equal(blast.lives,2);assert.equal(blast.failure,'explode');
+assert.equal(blast.bombs[0].phase,'idle','death resets bombs');
+armed=step(prepared(bomb.x,bomb.y),{x:0,y:0},0);
+assert.equal(step({...armed,marble:{x:bomb.x+90,y:bomb.y,vx:0,vy:0}},{x:0,y:0},BOMB.fuseSeconds+.01).lives,3,'escaping blast is safe');
+assert.equal(step({...armed,airborne:1},{x:0,y:0},BOMB.fuseSeconds+.01).lives,3,'bounce clears blast');
+for(const difficulty of DIFFICULTIES){
+  const l=LEVELS[0], f=l.features.find(f=>f.type==='merry');
+  let dizzy=step(prepared(f.x,f.y,{difficulty}),{x:1,y:0},1/60);assert.ok(dizzy.dizzy>0);
+  let expired=step({...dizzy,marble:{x:150,y:400,vx:0,vy:0}},{x:0,y:0},1);assert.equal(expired.dizzy,0,`${difficulty} dizziness expires safely`);
+  for(const danger of [l.obstacles[0],l.features.find(f=>f.type==='spikes')||l.features.find(f=>f.type==='pit'),l.bombs[0]]){
+    const x=danger.x+('w'in danger?5:0),y=danger.y+('h'in danger?5:0);
+    const hazard=step(prepared(x,y,{difficulty,dizzy:.5,bombs:l.bombs.map(b=>({...b,phase:'blast',time:.2}))}),{x:0,y:0},0);
+    assert.equal(hazard.lives,3,`${difficulty} dizzy hazard never costs life`);
+    if(hazard.marble.x===l.start.x&&hazard.marble.y===l.start.y)assert.equal(hazard.dizzy,0,`${difficulty} dizzy hazard clears dizziness`);
+  }
+}
+// Explicitly exercise active spike, enemy, pit, bomb and wall collisions while dizzy.
+for(const difficulty of DIFFICULTIES){
+  const l=LEVELS[2], spike=l.features.find(f=>f.type==='spikes'), pit=l.features.find(f=>f.type==='pit'), enemy=l.enemies[0], wall=l.obstacles[0];
+  for(const [name,x,y] of [['spike',spike.x,spike.y],['enemy',enemy.x,enemy.y],['wall',wall.x+5,wall.y+5],['pit',pit.x,pit.y]]){
+    if(name==='pit'&&difficulty==='beginner')continue;
+    const r=step({...newRun(2,difficulty),dizzy:.4,marble:{x,y,vx:0,vy:0}},{x:0,y:0},0);
+    assert.equal(r.lives,3,`${difficulty} dizzy ${name} is nonlethal`);
+    assert.equal(r.dizzy,0,`${difficulty} dizzy ${name} clears effect`);
+    assert.deepEqual({x:r.marble.x,y:r.marble.y},l.start,`${difficulty} dizzy ${name} resets safely`);
+  }
+}
+assert.match(app,/run.bombs.forEach\(b=>/,'bombs visually drawn');
+assert.match(app,/bomb! move away/,'bomb warning status');
+assert.match(html,/240" height="282/,'physical canvas dimensions');
+assert.match(css,/touch-action:none/,'touch steering suppresses native scroll');
+assert.ok(fs.readFileSync('./app.bundle.js','utf8').includes('bomb! move away'),'classic bundle contains new warning');
+console.log('all board/difficulty routes, side-only failure, bomb fuse/blast/escape/jump, dizzy safety: ok');

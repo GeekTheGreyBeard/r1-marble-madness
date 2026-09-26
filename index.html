@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Marble Madness · R1 Creation</title>
-  <link rel="stylesheet" href="styles.css?v=20260926-5">
+  <link rel="stylesheet" href="styles.css?v=20260926-6">
 </head>
 <body>
   <main id="r1-shell" aria-label="Marble Madness R1 game">
@@ -30,10 +30,10 @@
         <label class="difficulty-label" for="difficulty">difficulty</label><select id="difficulty" aria-label="difficulty"><option value="beginner">beginner</option><option value="standard" selected>standard</option><option value="pro">pro</option></select><button id="start" class="primary">start game</button><button id="start-waffle" class="secondary">☰ options</button>
       </section>
       <section id="menu" class="menu-overlay" aria-label="game controls and options" hidden>
-        <div class="menu-panel"><div class="menu-heading"><span>paused</span><button id="close-menu" aria-label="resume game">×</button></div><p><span id="tilt-status">tilt ready — tap tilt to enable</span><br>in touch mode the circular pad steers, with bounce in the center. In tilt mode only bounce remains visible. Stars charge super bounce. Tap bounce for 1 unit, hold 0.4s for 3; super doubles either. Sand slows, merry-go-rounds dizzy. Beginner has no pits and safe outer walls; standard rebounds and pulls; pro has deadly outer walls and stronger pull.</p><div class="menu-grid"><button id="audio">audio on</button><button id="pause">pause</button><button id="restart">restart</button><button id="theme">light mode</button></div><button id="resume" class="primary">continue</button></div>
+        <div class="menu-panel"><div class="menu-heading"><span>paused</span><button id="close-menu" aria-label="resume game">×</button></div><p><span id="tilt-status">tilt ready — tap tilt to enable</span><br>in touch mode the circular pad steers, with bounce in the center. In tilt mode only bounce remains visible. Stars charge super bounce. Tap bounce for 1 unit, hold 0.4s for 3; super doubles either. Sand slows, merry-go-rounds dizzy but never cost a life; danger clears dizziness and safely resets position. Bombs flash for 0.85s before a short radial blast: move out or bounce over it. Beginner has no pits and safe outer walls; standard rebounds and pulls; pro has deadly outer walls and stronger pull.</p><div class="menu-grid"><button id="audio">audio on</button><button id="pause">pause</button><button id="restart">restart</button><button id="theme">light mode</button></div><button id="resume" class="primary">continue</button></div>
       </section>
     </div>
   </main>
-  <script defer src="app.bundle.js?v=20260926-5"></script>
+  <script defer src="app.bundle.js?v=20260926-6"></script>
 </body>
 </html>
