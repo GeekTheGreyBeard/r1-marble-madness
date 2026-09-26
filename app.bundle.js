@@ -7,22 +7,23 @@
   var CAMERA_LEAD = { forward: 38, backward: -24, neutral: 0 };
   var wall = (x, y, w, h = WORLD.unit, type = "wall") => ({ x, y, w, h, type });
   var feature = (x, y, r, type) => ({ x, y, r, type });
-  function sealGates(obstacles) {
-    let side = 0;
-    return obstacles.map((o) => {
-      if (o.h !== WORLD.unit || o.w < 160) return o;
-      const r = side++ % 2 === 0 ? { ...o, x: 0, w: o.x + o.w } : { ...o, w: WORLD.width - o.x };
-      return r;
-    });
-  }
-  var level = (name, start, goal, obstacles, enemies, powerups, time, features = [], bombs = []) => ({ name, start, goal, obstacles: sealGates(obstacles), enemies, powerups, time, features, bombs });
   var BOMB = { triggerRadius: 25, fuseSeconds: 0.85, blastRadius: 42, blastSeconds: 0.22 };
-  var LEVELS = [
-    level("first roll", { x: 54, y: 1334 }, { x: 267, y: 66 }, [wall(30, 1210, 185), wall(125, 1018, 165), wall(30, 835, 208), wall(96, 640, 194), wall(30, 450, 205), wall(150, 255, 140), wall(220, 950, 58, 11, "half"), wall(22, 680, 54, 22, "rebound")], [], [{ x: 266, y: 1075 }], 75, [feature(262, 790, 18, "pit"), feature(55, 550, 18, "ice"), feature(260, 680, 22, "sand"), feature(55, 360, 21, "merry")], [feature(158, 1148, 12, "bomb"), feature(171, 576, 12, "bomb")]),
-    level("switchback", { x: 52, y: 1335 }, { x: 270, y: 62 }, [wall(30, 1245, 210), wall(82, 1085, 206), wall(30, 925, 200), wall(105, 760, 184), wall(30, 590, 205), wall(110, 410, 178), wall(30, 225, 188), wall(202, 925, WORLD.unit, 88), wall(28, 700, 65, 11, "half"), wall(245, 480, 50, 22, "rebound")], [{ x: 264, y: 1150, r: 14, axis: "y", span: 74, speed: 0.9 }], [{ x: 54, y: 700 }], 82, [feature(260, 1030, 19, "pit"), feature(55, 515, 18, "sticky"), feature(255, 320, 15, "bumper"), feature(55, 825, 22, "sand"), feature(258, 250, 21, "merry")], [feature(159, 1170, 12, "bomb"), feature(160, 665, 12, "bomb")]),
-    level("crossfire", { x: 52, y: 1335 }, { x: 269, y: 60 }, [wall(30, 1260, 215), wall(90, 1100, 198), wall(30, 940, 202), wall(95, 780, 193), wall(30, 620, 201), wall(104, 455, 185), wall(30, 290, 195), wall(145, 941, WORLD.unit, 76), wall(62, 620, WORLD.unit, 66), wall(225, 700, 64, 11, "half"), wall(22, 375, 56, 22, "rebound")], [{ x: 258, y: 1180, r: 14, axis: "y", span: 68, speed: 1.2 }, { x: 225, y: 520, r: 14, axis: "x", span: 45, speed: 1.05 }], [{ x: 262, y: 860 }, { x: 56, y: 350 }], 88, [feature(262, 1050, 20, "pit"), feature(58, 845, 18, "ice"), feature(250, 545, 16, "bumper"), feature(60, 205, 15, "spikes"), feature(256, 870, 22, "sand"), feature(57, 440, 21, "merry")], [feature(153, 1188, 12, "bomb"), feature(159, 690, 12, "bomb"), feature(166, 368, 12, "bomb")]),
-    level("marble storm", { x: 52, y: 1335 }, { x: 270, y: 60 }, [wall(30, 1270, 174), wall(113, 1120, 175), wall(30, 975, 189), wall(98, 830, 190), wall(30, 680, 198), wall(121, 530, 167), wall(30, 370, 198), wall(116, 210, 172), wall(52, 980, WORLD.unit, 76), wall(252, 720, WORLD.unit, 70), wall(145, 531, WORLD.unit, 76), wall(228, 890, 62, 11, "half"), wall(20, 455, 60, 22, "rebound")], [{ x: 245, y: 1160, r: 14, axis: "x", span: 35, speed: 1.55 }, { x: 55, y: 740, r: 14, axis: "y", span: 75, speed: 1.35 }, { x: 55, y: 350, r: 14, axis: "x", span: 30, speed: 1.7 }], [{ x: 55, y: 1040 }, { x: 262, y: 575 }], 96, [feature(260, 1080, 20, "pit"), feature(56, 875, 18, "sticky"), feature(250, 600, 16, "bumper"), feature(55, 285, 16, "spikes"), feature(257, 440, 18, "ice"), feature(256, 965, 22, "sand"), feature(55, 620, 21, "merry")], [feature(255, 1150, 12, "bomb"), feature(160, 746, 12, "bomb"), feature(55, 470, 12, "bomb")])
-  ];
+  var names = ["first roll", "switchback", "crossfire", "marble storm", "copper bend", "driftwood", "orbital lane", "nightfall", "switchyard", "ember ridge", "glass run", "twin peaks", "magnetic mile", "cinder loop", "blue shift", "gravity well", "sunset sprint", "spiral gate", "last crossing", "final orbit"];
+  function makeLevel(i) {
+    const shift = (i % 5 - 2) * 5, start = { x: 54, y: 1335 }, goal = { x: 266, y: 64 };
+    const obstacles = [];
+    for (let g = 0; g < 6; g++) {
+      const y = 1160 - g * 198 + ((i * 7 + g * 3) % 23 - 11) * 2;
+      obstacles.push(g % 2 === 0 ? wall(0, y, 218) : wall(102, y, 218));
+    }
+    obstacles.push(wall(140 + shift, 1290, 40, 11, "half"));
+    obstacles.push(wall(135 - shift, 93, 44, 22, "rebound"));
+    const features = [feature(155 + shift, 1210, 13, "pit"), feature(155 - shift, 1010, 14, "sand"), feature(155 + shift, 810, 14, "merry"), feature(155 - shift, 610, 13, "ice"), feature(155 + shift, 410, 13, "sticky"), feature(155 - shift, 210, 12, "spikes")];
+    const bombs = [feature(155 + shift, 1120, 12, "bomb"), feature(155 - shift, 520, 12, "bomb")];
+    const enemies = i > 2 ? [{ x: 155, y: 920, r: 12, axis: "x", span: 18, speed: 0.7 }] : [];
+    return { name: names[i], start, goal, obstacles, enemies, powerups: [{ x: 265, y: 1060 }], time: 180 + i * 3, features, bombs };
+  }
+  var LEVELS = Array.from({ length: 20 }, (_, i) => makeLevel(i));
   function newRun(levelIndex = 0, difficulty = "standard") {
     if (!DIFFICULTIES.includes(difficulty)) throw Error("unknown difficulty");
     const l = LEVELS[levelIndex];
@@ -671,7 +672,7 @@
     } else if (!transition && run.status === "won" && !manualPause) {
       cancelBounce();
       transition = { kind: "victory", start: now, duration: 650 };
-      notice.textContent = "all four long runs cleared";
+      notice.textContent = "all 20 runs cleared";
       sound("win");
     } else if (run.status === "won" && !transition) {
       manualPause = true;

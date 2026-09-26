@@ -37,7 +37,7 @@ function frame(now){const dt=Math.min(.04,(now-last)/1000);last=now;const previo
   if(run.failure&&run.lives<previous.lives){failUntil=now+600;sound('hit');notice.textContent=`${run.failure}! try that lane again.`}
   if(run.superJumps>previous.superJumps){sound('pickup');notice.textContent='super bounce charged'}
   if(!transition&&run.status==='cleared'){cancelBounce();transition={kind:'exit',start:now,duration:650};notice.textContent=`level clear · ${LEVELS[run.levelIndex+1].name}`;sound('win')}
-  else if(!transition&&run.status==='won'&&!manualPause){cancelBounce();transition={kind:'victory',start:now,duration:650};notice.textContent='all four long runs cleared';sound('win')}
+  else if(!transition&&run.status==='won'&&!manualPause){cancelBounce();transition={kind:'victory',start:now,duration:650};notice.textContent='all 20 runs cleared';sound('win')}
   else if(run.status==='won'&&!transition){manualPause=true}
   else if(run.status==='lost'){notice.textContent=`${run.failure||'run'} ended · restart to try again`;manualPause=true}
   camera=smoothCamera(camera,cameraFor(run),dt);syncUI();draw();requestAnimationFrame(frame)}showPhase('splash');syncUI();requestAnimationFrame(frame);
