@@ -40,10 +40,10 @@ node --check game.js
 node test.mjs
 ```
 
-The checks cover the startup/menu markers, menu pause model, fixed physical viewport values, centered scrolling camera/look-ahead, normal and super-bounce distances, power consumption, collision/failure states, progression, timer loss, and desktop fallback. Manual browser checks remain necessary for physical R1 motion and audio.
+The checks cover the startup/menu markers, menu pause model, fixed physical viewport values, centered scrolling camera/look-ahead, normal and super-bounce distances, power consumption, collision/failure states, progression, timer loss, and desktop fallback. The release was also exercised in a 240×282 touch browser through splash, start, active timer, waffle pause, and resume, including a cached reload. Physical R1 startup, motion, and audio still require on-device confirmation.
 
 ## published creation
 
 The HTTPS-hosted Creation is at `https://geekthegreybeard.github.io/r1-marble-madness/`.
 
-`marble-madness-r1-card.json` is the Creation-card configuration and `marble-madness-r1-install-qr.png` encodes that exact configuration. On R1, use **Creations card → Create tab → Add via QR code**, then scan the QR. Installation and physical-device behavior remain unverified until scanned and tested on-device.
+`marble-madness-r1-card.json` is the Creation-card configuration and `marble-madness-r1-install-qr.png` encodes that exact configuration. The release query on the card URL forces a fresh entry document rather than an earlier cached page; an existing installation may need the updated QR scanned again. The app now explicitly hides inactive overlay panels with `[hidden]`, uses a bundled classic script for older embedded browsers, and raises the waffle control above the D-pad. On R1, use **Creations card → Create tab → Add via QR code**, then scan the QR. Installation and physical-device behavior remain unverified until scanned and tested on-device.
